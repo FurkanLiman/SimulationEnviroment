@@ -2,18 +2,26 @@ import vpython as vp
 from time import *
 import random
 from environment import envSizes
+import mutationFactors
 
 class Creature:
     time = 0
-    def __init__(self, idnumber, color=(0,0,1), speed=0.1, axis=(1,0,0),pos = (0,1,-35)):
-        self.speed = speed
+    def __init__(self, idnumber, color=(0,0,1), speed=0.4, vision=0, allergyProtein=0, axis=(1,0,0), pos = (0,1,-35)):
+        self.genomes = {
+        "speed" : speed,
+        "vision" : vision,
+        # enviromental harshness
+        # durability 
+        }
         x,y,z = axis
         r,g,b= color
         posX,posY,posZ = pos
         self.hunger = False
         self.id = idnumber
         self.body = vp.ellipsoid(size = vp.vector(2,7,2), axis = vp.vector(x,y,z), color=vp.vector(r,g,b),pos=vp.vector(posX,posY,posZ))
-        self.idText = vp.text(text=f"{idnumber}",align="center",color=vp.vector(r,g,b),pos=vp.vector(posX,posY,posZ))
+        self.idText = vp.label(text=f"{idnumber}",color=vp.vector(r,g,b),pos=self.body.pos,line=True)
+        
+
     
     def pos(self):
         if abs(self.body.pos.x) >= envSizes[0]/2 or abs(self.body.pos.z) >= envSizes[2]/2:
@@ -26,13 +34,13 @@ class Creature:
         posZ=positions.z+disZ
         self.body.pos = vp.vector(posX,posY,posZ)
         self.idText.pos = self.body.pos
-        self.idText.pos.y = self.body.size.y
+        self.idText.pos.y = self.body.size.y*0.75
     
     def displacement(self):
         axiss=self.body.axis
-        x = self.speed*axiss.x
-        y = self.speed*axiss.y
-        z = self.speed*axiss.z
+        x = self.genomes["speed"]*axiss.x
+        y = self.genomes["speed"]*axiss.y
+        z = self.genomes["speed"]*axiss.z
         return x,y,z
     
     def collide(self,foods):
@@ -48,12 +56,13 @@ class Creature:
             distanceZ = abs(foodZ-charZ)
             distancePythagor = (distanceX**2+distanceY**2+distanceZ**2)**(0.5)
             
-            if distancePythagor<=(self.body.size.x+food.body.radius):
+            if distancePythagor<=(self.body.size.x+food.body.radius) and not food.eat:
                 print(f"{self.id} found food: {food.id}")
-                self.hunger = True
-                foundID = food.id    
+                self.hunger = True 
+                food.body.color = vp.color.red
+                food.eat = True
+
         
-        foods.pop(foundID) if self.hunger else None
                 
 
         
@@ -68,10 +77,16 @@ class Creature:
                 self.pos()
             self.collide(foods)
                     
+    def mutation(self):
+        mutationState,self = mutationFactors.mutationChance(self)
+        if mutationState:
+            self.body.color = vp.vector(random.randint(0,100)/100, random.randint(0,100)/100, random.randint(0,100)/100)    
+            self.idText.color = self.body.color
     
     
 class Food:
     def __init__(self, id,size=.75, pos=(0,0,0)):
+        self.eat = False
         x,y,z=pos
         self.id = id
         self.body = vp.sphere(radius=size,pos=vp.vector(x,y,z),color= vp.color.green)
