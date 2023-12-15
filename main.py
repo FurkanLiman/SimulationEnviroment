@@ -24,8 +24,10 @@ class Chars:
                 winners.append(char.id)
                 char.mutation()
             else: 
+                #visible işlemlerimni taşı
                 char.body.visible = False
                 char.idText.visible = False
+                char.angle.visible = False 
                 losers.append(char.id)
         
         for loser in losers:
@@ -75,11 +77,12 @@ class Foods:
             food = creature.Food(pos=pos, id=i)
             self.foods[i] = food
         
-dozenChar = Chars(25)
-dozenFood = Foods(50)
+dozenChar = Chars(20)
+dozenFood = Foods(30)
 
-
-
+"""kon = vp.cone(pos=vp.vector(0,0,0), axis=vp.vector(1,0,0))
+kon.size = vp.vector(15,5,7)"""
+# uzunluk ,yükseklik, genişlik
 times = 0
 day = 0
 while True:

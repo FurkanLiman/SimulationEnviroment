@@ -3,7 +3,7 @@ import random
 mutationProbability = 0.5 #0-1
 specs = {
 "speed": [0,2], 
-"vision" : [0,15]
+"vision" : [0,90]
 }
 
 
