@@ -2,23 +2,23 @@ import random
 
 mutationProbability = 0.5 #0-1
 specs = {
-"speed": [0,2], 
-"vision" : [0,90]
+"speed": [0.2,2], 
+"vision" : [10,90],
+"visionRadius":[2,30]
 }
 
 
-def mutationChance(char):
+def mutationChance():
     probInt = int(mutationProbability**(-1))
     result = random.randint(0,probInt)
 
     if result == 0:
         winnerSpec = chooseSpec()
         newSpec = getMutation(winnerSpec)
-        print(f"{char.id}: Got Mutation for --{winnerSpec}-- old spec:{char.genomes[winnerSpec]} -- new:{newSpec}")
-        char.genomes[winnerSpec] = newSpec
-        return True, char
+        
+        return True, winnerSpec,newSpec
     else:
-        return False, char
+        return False, None, None
 
 def chooseSpec():
     whichSpec = random.randint(0,len(specs)-1)

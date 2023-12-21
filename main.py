@@ -3,6 +3,7 @@ import time
 import environment
 import creature
 import random
+import copy
 
 class Chars:
     chars = {}
@@ -29,6 +30,21 @@ class Chars:
                 char.idText.visible = False
                 char.angle.visible = False 
                 losers.append(char.id)
+        
+        for charId in winners:
+            newId = (charId +10)**2
+            self.chars[newId] = copy.copy(self.chars[charId])
+            self.chars[newId].id = newId
+            self.chars[newId].body = self.chars[charId].body.clone()
+            self.chars[newId].idText = vp.label(text=f"{newId}",color=self.chars[newId].body.color, pos=self.chars[newId].body.pos,line=True)
+            acirad = self.chars[newId].genomes["vision"]*vp.pi/180
+            aci1 = -(acirad)/2 + vp.pi/2
+            aci2 = (acirad)/2 + vp.pi/2
+            self.chars[newId].arc2D = vp.shapes.circle(radius=self.chars[newId].genomes["visionRadius"],angle1=aci1, angle2=aci2)
+            self.chars[newId].angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,0.5,0)],shape=  self.chars[newId].arc2D , opacity = 0.3, color = self.chars[newId].body.color/2)
+
+
+
         
         for loser in losers:
             del self.chars[loser].body
@@ -68,6 +84,7 @@ class Foods:
     def restartFoods(self):
         for food in self.foods.values():
             food.body.visible = False
+            #food.idText = False
         self.foods.clear()
         
         for i in range(self.number):
@@ -77,12 +94,9 @@ class Foods:
             food = creature.Food(pos=pos, id=i)
             self.foods[i] = food
         
-dozenChar = Chars(20)
-dozenFood = Foods(30)
+dozenChar = Chars(10)
+dozenFood = Foods(20)
 
-"""kon = vp.cone(pos=vp.vector(0,0,0), axis=vp.vector(1,0,0))
-kon.size = vp.vector(15,5,7)"""
-# uzunluk ,yükseklik, genişlik
 times = 0
 day = 0
 while True:
@@ -99,7 +113,7 @@ while True:
             break
         
         times += 1
-    vp.rate(30)
+    vp.rate(40)
 
 while True:
     pass
