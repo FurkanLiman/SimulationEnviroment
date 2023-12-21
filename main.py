@@ -33,7 +33,7 @@ class Chars:
         
         for charId in winners:
             newId = (charId +10)**2
-            self.chars[newId] = copy.copy(self.chars[charId])
+            self.chars[newId] = copy.deepcopy(self.chars[charId])
             self.chars[newId].id = newId
             self.chars[newId].body = self.chars[charId].body.clone()
             self.chars[newId].idText = vp.label(text=f"{newId}",color=self.chars[newId].body.color, pos=self.chars[newId].body.pos,line=True)
@@ -97,13 +97,26 @@ class Foods:
 dozenChar = Chars(10)
 dozenFood = Foods(20)
 
+def M(m):
+    val = m.selected
+    environment.scene.camera.follow(dozenChar.chars[int(val)].body)
+
+menulist=[]
+for i in dozenChar.chars.keys():
+    menulist.append(str(i))
+vp.menu(choices=menulist, index=0, bind=M)
+
+
+
+
+
 times = 0
 day = 0
 while True:
     if environment.running:
         
         dozenChar.setPos(dozenFood)
-        environment.info(dozenChar.chars)
+        #environment.info(dozenChar.chars)
         
         if times >=30*20:
             dozenChar.endofDay(dozenFood)

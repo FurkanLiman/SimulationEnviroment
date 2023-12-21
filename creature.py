@@ -29,10 +29,6 @@ class Creature:
         self.arc2D = vp.shapes.circle(radius=visionRadius,angle1=aci1, angle2=aci2)
         self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,0.5,0)],shape= self.arc2D, opacity = 0.3, color = self.body.color/2)
 
-        
-
-        
-        
     
     def pos(self):
         if abs(self.body.pos.x) >= envSizes[0]/2 or abs(self.body.pos.z) >= envSizes[2]/2:

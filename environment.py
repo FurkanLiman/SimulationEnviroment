@@ -18,11 +18,9 @@ def Run(b):
     if running: b.text = "Pause"
     else: b.text = "Run"
 
-
 vp.button(text="Pause", pos=scene.title_anchor, bind=Run)
 
-
-infos = vp.wtext(text="")
+"""infos = vp.wtext(text="")
 def info(chars):
     infos.text = ""
     texts = ""
@@ -32,4 +30,4 @@ def info(chars):
         for name,gen in char.genomes.items():
             gens += f"  {name}  {gen},"
         texts +=  f"id: {char.id}" + gens + "\n"
-    infos.text = texts
+    infos.text = texts"""
