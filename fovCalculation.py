@@ -3,7 +3,7 @@ import random
 
 
 def inSight(distances,bodyAxis,vision):
-    bodyAngle=math.atan(bodyAxis.x/bodyAxis.z)*180/math.pi  if bodyAxis.z != 0 else 90
+    bodyAngle=math.atan(bodyAxis.x/bodyAxis.z)*180/math.pi  if bodyAxis.z != 0 else 1
     if bodyAxis.x < 0 and bodyAxis.z > 0:
         bodyAngle = 360+bodyAngle
     elif bodyAxis.x <0 and bodyAxis.z < 0:
@@ -11,7 +11,7 @@ def inSight(distances,bodyAxis,vision):
     elif bodyAxis.x >0 and bodyAxis.z <0:
         bodyAngle = 180+bodyAngle
     
-    bodyfoodAngle =  math.atan(distances.x/distances.z)*(180/math.pi) if distances.z != 0 else 90
+    bodyfoodAngle =  math.atan(distances.x/distances.z)*(180/math.pi) if distances.z != 0 else 1
     if distances.x < 0 and distances.z > 0:
         bodyfoodAngle = 360+bodyfoodAngle
     elif distances.x <0 and distances.z < 0:
@@ -31,4 +31,3 @@ def randomAxis():
     axisX = math.sin(angleRadian)
     axisZ = math.cos(angleRadian)
     return axisX,axisZ
-    

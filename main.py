@@ -5,6 +5,8 @@ import creature
 import random
 import copy
 
+env = environment.Enviroment(environment.envSizes)
+
 class Chars:
     chars = {}
     def __init__(self, number=10):
@@ -24,39 +26,49 @@ class Chars:
             if char.hunger:
                 winners.append(char.id)
                 char.mutation()
-            else: 
-                #visible işlemlerimni taşı
-                char.body.visible = False
-                char.idText.visible = False
-                char.angle.visible = False 
+            else:
+                char.unVisible()
                 losers.append(char.id)
         
         for charId in winners:
-            newId = (charId +10)**2
-            self.chars[newId] = copy.deepcopy(self.chars[charId])
-            self.chars[newId].id = newId
-            self.chars[newId].body = self.chars[charId].body.clone()
-            self.chars[newId].idText = vp.label(text=f"{newId}",color=self.chars[newId].body.color, pos=self.chars[newId].body.pos,line=True)
-            acirad = self.chars[newId].genomes["vision"]*vp.pi/180
-            aci1 = -(acirad)/2 + vp.pi/2
-            aci2 = (acirad)/2 + vp.pi/2
-            self.chars[newId].arc2D = vp.shapes.circle(radius=self.chars[newId].genomes["visionRadius"],angle1=aci1, angle2=aci2)
-            self.chars[newId].angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,0.5,0)],shape=  self.chars[newId].arc2D , opacity = 0.3, color = self.chars[newId].body.color/2)
-
-
-
-        
+            while True:
+                newId = random.randint(0,1000000)
+                if not (newId in winners):
+                    break
+            print(f"{charId} duplicated {newId}")
+            color = copy.deepcopy(self.chars[charId].body.color)
+            speed = copy.deepcopy(self.chars[charId].genomes["speed"])
+            vision = copy.deepcopy(self.chars[charId].genomes["vision"])
+            visionRadius = copy.deepcopy(self.chars[charId].genomes["visionRadius"])
+            axis =copy.deepcopy(self.chars[charId].body.axis)
+            pos = copy.deepcopy(self.chars[charId].body.pos)
+            self.chars[newId] = creature.Creature(idnumber=newId,color=(color.x,color.y,color.z),speed=speed, vision=vision, visionRadius=visionRadius,axis=(axis.x,axis.y,axis.z), pos=(pos.x,pos.y,pos.z))
+            self.chars[newId].angle.pos.x = (visionRadius/2)*axis.x + self.chars[newId].body.pos.x
+            self.chars[newId].angle.pos.z = (visionRadius/2)*axis.z + self.chars[newId].body.pos.z
+            self.chars[newId].angle.axis = self.chars[newId].body.axis
+            
+            
         for loser in losers:
             del self.chars[loser].body
+            del self.chars[loser].idText
+            del self.chars[loser].angle
             self.chars.pop(loser)
+            
         return winners, losers
         
     def resetPos(self):
         i = 0
         for char in self.chars.values():
             pos = round(environment.envSizes[0]*0.85/len(self.chars)*i,2)-round(environment.envSizes[0]*0.85/2,2)
-            char.body.pos=vp.vector(pos,0,(environment.envSizes[2]*0.9)//2)
+            axis = vp.vector(1,0,0)
+            char.body.axis = axis
+            char.body.pos=vp.vector(pos,0,(environment.envSizes[2]*0.9)//2)            
             char.idText.pos = char.body.pos
+            char.angle.pos.x = (char.genomes["visionRadius"]/2)*axis.x + char.body.pos.x
+            char.angle.pos.z = (char.genomes["visionRadius"]/2)*axis.z + char.body.pos.z
+            char.angle.axis = char.body.axis
+            
+            
             char.hunger =False
             i +=1
     
@@ -95,34 +107,25 @@ class Foods:
             self.foods[i] = food
         
 dozenChar = Chars(10)
-dozenFood = Foods(20)
+dozenFood = Foods(70)
 
-def M(m):
-    val = m.selected
-    environment.scene.camera.follow(dozenChar.chars[int(val)].body)
-
-menulist=[]
-for i in dozenChar.chars.keys():
-    menulist.append(str(i))
-vp.menu(choices=menulist, index=0, bind=M)
-
-
-
-
+env.dozenChar = dozenChar
+env.menu.choices= env.updateMenu(dozenChar)
 
 times = 0
 day = 0
 while True:
-    if environment.running:
-        
+    if env.running:
         dozenChar.setPos(dozenFood)
         #environment.info(dozenChar.chars)
         
         if times >=30*20:
             dozenChar.endofDay(dozenFood)
+            env.dozenChar = dozenChar
+            env.menu.choices= env.updateMenu(dozenChar)
             times = 0
             day +=1
-        if day >= 5:
+        if day >= 10:
             break
         
         times += 1

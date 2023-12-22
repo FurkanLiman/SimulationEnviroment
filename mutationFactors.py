@@ -1,6 +1,6 @@
 import random
 
-mutationProbability = 0.5 #0-1
+mutationProbability = 0.25 #0-1
 specs = {
 "speed": [0.2,2], 
 "vision" : [10,90],
@@ -9,10 +9,10 @@ specs = {
 
 
 def mutationChance():
-    probInt = int(mutationProbability**(-1))
-    result = random.randint(0,probInt)
+    probInt = int(mutationProbability*100)
+    result = random.randint(0,100)
 
-    if result == 0:
+    if result < probInt:
         winnerSpec = chooseSpec()
         newSpec = getMutation(winnerSpec)
         

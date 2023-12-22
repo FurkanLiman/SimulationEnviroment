@@ -19,16 +19,27 @@ class Creature:
         x,y,z = axis
         r,g,b= color
         posX,posY,posZ = pos
+        
         self.hunger = False
         self.id = idnumber
         self.body = vp.ellipsoid(size = vp.vector(2,7,2), axis = vp.vector(x,y,z), color=vp.vector(r,g,b),pos=vp.vector(posX,posY,posZ))
         self.idText = vp.label(text=f"{idnumber}",color=vp.vector(r,g,b),pos=self.body.pos,line=True)
+        
         acirad = vision*vp.pi/180
         aci1 = -(acirad)/2 + vp.pi/2
         aci2 = (acirad)/2 + vp.pi/2
+        
         self.arc2D = vp.shapes.circle(radius=visionRadius,angle1=aci1, angle2=aci2)
         self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,0.5,0)],shape= self.arc2D, opacity = 0.3, color = self.body.color/2)
 
+        self.angle.pos.x = (visionRadius/2)*x + self.body.pos.x
+        self.angle.pos.z = (visionRadius/2)*z + self.body.pos.z
+        self.angle.axis = self.body.axis
+        
+    def unVisible(self):
+        self.body.visible = False
+        self.idText.visible = False
+        self.angle.visible = False 
     
     def pos(self):
         if abs(self.body.pos.x) >= envSizes[0]/2 or abs(self.body.pos.z) >= envSizes[2]/2:
@@ -42,8 +53,8 @@ class Creature:
         
         self.angle.pos.x = (self.genomes["visionRadius"]/2)*self.body.axis.x + self.body.pos.x
         self.angle.pos.z = (self.genomes["visionRadius"]/2)*self.body.axis.z + self.body.pos.z
-        
         self.angle.axis = self.body.axis
+        
 
     def collide(self,foods):
         for food,distance,angle in foods:
@@ -99,12 +110,11 @@ class Creature:
                         minfood = (food,distance,angle)       
                 self.goCloserFood(minfood)
             else:
-                if not self.time % 10:
-                    # random değil ufak açılarla smooth dönüş ekle
+                if not self.time %10:
                     axis = fovCalculation.randomAxis()
                     self.body.axis = vp.vector(axis[0],0,axis[1])
+                    
             self.pos()
-
             
             self.collide(visibleFoods)
                     
@@ -122,6 +132,9 @@ class Creature:
                 acirad = newSpec*vp.pi/180
                 aci1 = -(acirad)/2 + vp.pi/2
                 aci2 = (acirad)/2 + vp.pi/2
+                del self.arc2D
+                self.angle.visible = False
+                del self.angle
                 self.arc2D = vp.shapes.circle(radius=self.genomes["visionRadius"],angle1=aci1, angle2=aci2, pos= [5,-20])
                 self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,1,0)],shape= self.arc2D, opacity = 0.5, color = self.body.color/2)
             elif winnerSpec == "visionRadius":
@@ -129,6 +142,9 @@ class Creature:
                 acirad = self.genomes["vision"]*vp.pi/180
                 aci1 = -(acirad)/2 + vp.pi/2
                 aci2 = (acirad)/2 + vp.pi/2
+                del self.arc2D
+                self.angle.visible = False
+                del self.angle
                 self.arc2D = vp.shapes.circle(radius=newSpec,angle1=aci1, angle2=aci2, pos= [5,-20])
                 self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,1,0)],shape= self.arc2D, opacity = 0.5, color = self.body.color/2)
             
