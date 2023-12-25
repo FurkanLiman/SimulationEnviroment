@@ -28,7 +28,7 @@ class Enviroment:
         vp.wtext(text= "    |    MutationRate:", pos = self.scene.title_anchor)
         self.mutationRate = vp.slider(min=0, max=1000, value=5, length=220,pos=self.scene.title_anchor, bind=self.setMutationRate, right=15, text= "sea")
         self.mutationRateText = vp.wtext(text='{:1.2f}'.format(self.mutationRate.value/1000), pos= self.scene.title_anchor)
-
+        mutationFactors.mutationProbability = self.mutationRate.value/1000
         
         self.running = True
         self.menulist = ["default"]
@@ -79,7 +79,7 @@ class Enviroment:
         gens = ""
         for name,gen in char.genomes.items():
             gens += f"  {name}  {gen},"
-        texts =  f"id: {char.id}" + gens + " hunger:" + str(not char.hunger)  + "\n"
+        texts =  f"  id: {char.id}" + gens + " hunger:" + str(not char.hunger)  + "\n"
         
         self.infos.text = texts
         
