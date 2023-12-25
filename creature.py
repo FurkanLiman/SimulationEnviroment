@@ -31,6 +31,7 @@ class Creature:
         
         self.arc2D = vp.shapes.circle(radius=visionRadius,angle1=aci1, angle2=aci2)
         self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,0.5,0)],shape= self.arc2D, opacity = 0.3, color = self.body.color/2)
+        self.angle.visible = False
 
         self.angle.pos.x = (visionRadius/2)*x + self.body.pos.x
         self.angle.pos.z = (visionRadius/2)*z + self.body.pos.z
@@ -55,7 +56,6 @@ class Creature:
         self.angle.pos.z = (self.genomes["visionRadius"]/2)*self.body.axis.z + self.body.pos.z
         self.angle.axis = self.body.axis
         
-
     def collide(self,foods):
         for food,distance,angle in foods:
 
@@ -92,7 +92,6 @@ class Creature:
         axisZ = math.cos(angleRadian)
         self.body.axis.x = axisX
         self.body.axis.z = axisZ
-
 
     def searchFood(self,foods):
         if not self.hunger:

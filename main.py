@@ -46,6 +46,7 @@ class Chars:
             self.chars[newId].angle.pos.x = (visionRadius/2)*axis.x + self.chars[newId].body.pos.x
             self.chars[newId].angle.pos.z = (visionRadius/2)*axis.z + self.chars[newId].body.pos.z
             self.chars[newId].angle.axis = self.chars[newId].body.axis
+            self.chars[newId].angle.visible = False
             
             
         for loser in losers:
@@ -67,13 +68,14 @@ class Chars:
             char.angle.pos.x = (char.genomes["visionRadius"]/2)*axis.x + char.body.pos.x
             char.angle.pos.z = (char.genomes["visionRadius"]/2)*axis.z + char.body.pos.z
             char.angle.axis = char.body.axis
+            char.angle.visible = False
             
             
             char.hunger =False
             i +=1
     
     def endofDay(self,Foods):
-        print("End of The Day")
+        print("End of The Day", day)
         winners, losers = self.results()
         print("Results:")
         print("Winners:", winners)
@@ -93,6 +95,7 @@ class Foods:
             pos = (random.randint(0,x)-x//2,0,random.randint(0,z)-z//2)
             food = creature.Food(pos=pos, id=i)
             self.foods[i] = food
+    
     def restartFoods(self):
         for food in self.foods.values():
             food.body.visible = False
@@ -106,30 +109,30 @@ class Foods:
             food = creature.Food(pos=pos, id=i)
             self.foods[i] = food
         
-dozenChar = Chars(10)
-dozenFood = Foods(70)
+dozenChar = Chars(2)
+dozenFood = Foods(20)
 
 env.dozenChar = dozenChar
 env.menu.choices= env.updateMenu(dozenChar)
-
 times = 0
-day = 0
+day = 1
 while True:
     if env.running:
         dozenChar.setPos(dozenFood)
         #environment.info(dozenChar.chars)
         
-        if times >=30*20:
+        if times >=24*60:
             dozenChar.endofDay(dozenFood)
             env.dozenChar = dozenChar
             env.menu.choices= env.updateMenu(dozenChar)
             times = 0
             day +=1
-        if day >= 10:
+        if day >= 15:
             break
         
         times += 1
-    vp.rate(40)
+        env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
+    vp.rate(env.speed.value)
 
 while True:
     pass

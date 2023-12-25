@@ -1,6 +1,6 @@
 import random
 
-mutationProbability = 0.25 #0-1
+mutationProbability = 0.35 #0-1
 specs = {
 "speed": [0.2,2], 
 "vision" : [10,90],
