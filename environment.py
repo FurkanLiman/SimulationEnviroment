@@ -4,13 +4,7 @@ import mutationFactors
 
 #1800*900
 envSizes = 70,1,70
-"""scene = vp.canvas(title='Natural Selection Environment      ', width=1800, height=900, background= vp.vector(.95,.95,.95))
-space = vp.box(pos=vp.vector(0,-4,0),size=vp.vector(envSizes[0],envSizes[1],envSizes[2]))"""
 
-"""vp.arrow(pos=vp.vector(0,2,0), axis=vp.vector(2,0,0), color= vp.color.red)
-vp.label(text="x",color=vp.color.red, pos=vp.vector(1,2,0),line=True)
-vp.arrow(pos=vp.vector(0,2,0), axis= vp.vector(0,0,2), color = vp.color.blue)
-vp.label(text="z",color=vp.color.blue, pos=vp.vector(0,2,1),line=True)"""
 
 
 
@@ -22,7 +16,7 @@ class Enviroment:
         vp.wtext(text= "    |   ", pos = self.scene.title_anchor)
         vp.checkbox(text="Show View Angles    ", pos = self.scene.title_anchor, bind=self.showAngles)
         vp.wtext(text='|    Vary the speedrate', pos= self.scene.title_anchor, color = vp.color.red)
-        self.speed = vp.slider(min=5, max=90, value=30, length=220,pos=self.scene.title_anchor, bind=self.setSpeed, right=15)
+        self.speed = vp.slider(min=5, max=200, value=30, length=220,pos=self.scene.title_anchor, bind=self.setSpeed, right=15)
         self.speedText = vp.wtext(text='{:1.2f}'.format(self.speed.value), pos= self.scene.title_anchor)
         self.dayInfo = vp.wtext(text= "    |    Time= 00:00    Day= 0", pos = self.scene.title_anchor)
         vp.wtext(text= "    |    MutationRate:", pos = self.scene.title_anchor)

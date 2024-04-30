@@ -80,10 +80,10 @@ class Chars:
         print("Results:")
         print("Winners:", winners)
         print("Losers:", losers)
-        time.sleep(2)
+        #time.sleep(2)
         Foods.restartFoods()
         self.resetPos()
-        time.sleep(1)
+        #time.sleep(1)
         
 class Foods:
     foods = {}
@@ -115,11 +115,10 @@ dozenFood = Foods(20)
 env.dozenChar = dozenChar
 env.menu.choices= env.updateMenu(dozenChar)
 times = 0
-day = 1
+day = 6
 while True:
     if env.running:
         dozenChar.setPos(dozenFood)
-        #environment.info(dozenChar.chars)
         
         if times >=24*60:
             dozenChar.endofDay(dozenFood)
@@ -132,7 +131,11 @@ while True:
         
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
-    vp.rate(env.speed.value)
+        vp.rate(env.speed.value)
+
+    else:
+        vp.rate(30)    
+    
 
 while True:
     pass
