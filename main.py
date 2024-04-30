@@ -4,8 +4,14 @@ import environment
 import creature
 import random
 import copy
+from ete3 import Tree, TreeStyle, NodeStyle, TextFace
+from PIL import Image
 
 env = environment.Enviroment(environment.envSizes)
+
+PhyloTree = Tree()
+root = PhyloTree.get_tree_root()
+genePool = {}
 
 class Chars:
     chars = {}
@@ -13,7 +19,14 @@ class Chars:
         for i in range(number):
             pos = round(environment.envSizes[0]*0.85/number,2)*i-round(environment.envSizes[0]*0.85/2,2)
             char = creature.Creature(idnumber=i,pos=(pos,0,(environment.envSizes[2]*0.9)//2))
+
             self.chars[i]= char
+            if self.chars[i].gene not in genePool:
+                nstyle = NodeStyle()
+                nstyle["fgcolor"] = ("#{:02x}{:02x}{:02x}".format(int(char.body.color.x*255), int(char.body.color.y*255), int(char.body.color.z*255)))
+                nstyle["size"] = 10
+                genePool[self.chars[i].gene] = root.add_child(name= self.chars[i].gene)
+                genePool[self.chars[i].gene].set_style(nstyle)
 
     def setPos(self,foodlist):
         for char in self.chars.values():
@@ -25,7 +38,15 @@ class Chars:
         for char in self.chars.values():
             if char.hunger:
                 winners.append(char.id)
-                char.mutation()
+                oldGene= char.gene
+                mutationState = char.mutation()
+                if mutationState:
+                    nstyle = NodeStyle()
+                    nstyle["size"] = 10
+                    nstyle["fgcolor"] = ("#{:02x}{:02x}{:02x}".format(int(char.body.color.x*255), int(char.body.color.y*255), int(char.body.color.z*255)))
+                    genePool[char.gene] = genePool[oldGene].add_child(name=char.gene)
+                    genePool[char.gene].set_style(nstyle)
+                # canlı mutasyon geçirdiyse canlının eski genine rootla
             else:
                 char.unVisible()
                 losers.append(char.id)
@@ -85,6 +106,20 @@ class Chars:
         self.resetPos()
         #time.sleep(1)
         
+    def countGene(self):
+        ts = TreeStyle()
+        ts.show_leaf_name = True
+        for i in genePool.keys():
+            genes = []
+            for j in self.chars.values():
+                genes.append(j.gene)
+            total = genes.count(i)
+            totalText = TextFace(str(total))
+            totalText.fgcolor="red"
+            genePool[i].add_face(totalText, column=1, position = "branch-bottom")
+
+            
+            
 class Foods:
     foods = {}
     def __init__(self,number):
@@ -115,7 +150,15 @@ dozenFood = Foods(20)
 env.dozenChar = dozenChar
 env.menu.choices= env.updateMenu(dozenChar)
 times = 0
-day = 6
+day = 1
+
+ts = TreeStyle()
+ts.show_leaf_name = True
+ts.mode = "c"
+ts.arc_start = -180  # 0 derece = saat 3
+ts.arc_span = 180
+filenames = []
+
 while True:
     if env.running:
         dozenChar.setPos(dozenFood)
@@ -124,18 +167,31 @@ while True:
             dozenChar.endofDay(dozenFood)
             env.dozenChar = dozenChar
             env.menu.choices= env.updateMenu(dozenChar)
+            
+            PhyloTree.render(f"results/Tree_day{day}.png", tree_style=ts)
+            filenames.append(f"results/Tree_day{day}.png")
+            
             times = 0
             day +=1
-        if day >= 15:
+        if day >= 8:
             break
-        
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
         vp.rate(env.speed.value)
 
     else:
         vp.rate(30)    
-    
+
+dozenChar.countGene()
+
+images = [ ]
+if len(filenames)!=0:
+    for filename in filenames:
+        images.append(Image.open(filename))
+width, height = images[0].size
+images[0].save("results/result.gif", save_all=True, append_images=images[1:], duration=500, loop=0)
+
+PhyloTree.show(tree_style=ts)
 
 while True:
     pass
