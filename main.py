@@ -6,6 +6,7 @@ import random
 import copy
 from ete3 import Tree, TreeStyle, NodeStyle, TextFace
 from PIL import Image
+import radarChart
 
 env = environment.Enviroment(environment.envSizes)
 
@@ -15,6 +16,7 @@ genePool = {}
 
 class Chars:
     chars = {}
+    EoDStats = {}
     def __init__(self, number=10):
         for i in range(number):
             pos = round(environment.envSizes[0]*0.85/number,2)*i-round(environment.envSizes[0]*0.85/2,2)
@@ -46,17 +48,18 @@ class Chars:
                     nstyle["fgcolor"] = ("#{:02x}{:02x}{:02x}".format(int(char.body.color.x*255), int(char.body.color.y*255), int(char.body.color.z*255)))
                     genePool[char.gene] = genePool[oldGene].add_child(name=char.gene)
                     genePool[char.gene].set_style(nstyle)
-                # canlı mutasyon geçirdiyse canlının eski genine rootla
             else:
                 char.unVisible()
                 losers.append(char.id)
         
+        self.dailyStats(winners)
+        
         for charId in winners:
-            while True:
+            while True:#burayı değiştir bence belki buga girmesini burası sağlıyordur
                 newId = random.randint(0,1000000)
                 if not (newId in winners):
                     break
-            print(f"{charId} duplicated {newId}")
+            #print(f"{charId} duplicated {newId}")
             color = copy.deepcopy(self.chars[charId].body.color)
             speed = copy.deepcopy(self.chars[charId].genomes["speed"])
             vision = copy.deepcopy(self.chars[charId].genomes["vision"])
@@ -77,6 +80,19 @@ class Chars:
             self.chars.pop(loser)
             
         return winners, losers
+        
+    def dailyStats(self, winners):
+        speedSum, visionSum,visionRadiusSum = 0,0,0
+        for charId in winners:
+            speedSum += self.chars[charId].genomes["speed"]
+            visionSum += self.chars[charId].genomes["vision"]
+            visionRadiusSum += self.chars[charId].genomes["visionRadius"]
+        avarageSpeed = speedSum / len(winners)
+        avarageVision = visionSum / len(winners)
+        avarageVisionRadius = visionRadiusSum / len(winners)
+        self.EoDStats[day] = [avarageSpeed,avarageVision,avarageVisionRadius]
+            
+            
         
     def resetPos(self):
         i = 0
@@ -155,7 +171,7 @@ day = 1
 ts = TreeStyle()
 ts.show_leaf_name = True
 ts.mode = "c"
-ts.arc_start = -180  # 0 derece = saat 3
+ts.arc_start = -180
 ts.arc_span = 180
 filenames = []
 
@@ -173,7 +189,7 @@ while True:
             
             times = 0
             day +=1
-        if day >= 8:
+        if day >= 15:
             break
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
@@ -182,14 +198,16 @@ while True:
     else:
         vp.rate(30)    
 
-dozenChar.countGene()
 
+dozenChar.countGene()
+#matplot grafiğini hem pylotreeyi aynı anda bastır.
+radarChart.resultChart(dozenChar.EoDStats)
 images = [ ]
 if len(filenames)!=0:
     for filename in filenames:
         images.append(Image.open(filename))
-width, height = images[0].size
-images[0].save("results/result.gif", save_all=True, append_images=images[1:], duration=500, loop=0)
+    width, height = images[0].size
+    images[0].save("results/result.gif", save_all=True, append_images=images[1:], duration=500, loop=0)
 
 PhyloTree.show(tree_style=ts)
 

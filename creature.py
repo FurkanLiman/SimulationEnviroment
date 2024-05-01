@@ -124,7 +124,7 @@ class Creature:
         if mutationState:
             self.body.color = vp.vector(random.randint(0,100)/100, random.randint(0,100)/100, random.randint(0,100)/100)    
             self.idText.color = self.body.color
-            print(f"{self.id}: Got Mutation for --{winnerSpec}-- old spec:{self.genomes[winnerSpec]} -- new:{newSpec}")
+            #print(f"{self.id}: Got Mutation for --{winnerSpec}-- old spec:{self.genomes[winnerSpec]} -- new:{newSpec}")
             self.genomes[winnerSpec] = newSpec
             if winnerSpec == "speed":
                 self.genomes["speed"] = newSpec
