@@ -178,15 +178,15 @@ ts.arc_start = -180
 ts.arc_span = 180
 
 filenames = []
-folder_path = "results/dailyPhyloTree/"
-file_list = os.listdir(folder_path)
 
-# Klasördeki tüm PNG dosyalarını sil
-for file_name in file_list:
+folderPath = "results/dailyPhyloTree/"
+fileList = os.listdir(folderPath)
+for file_name in fileList:
     if file_name.endswith(".png"):
-        file_path = os.path.join(folder_path, file_name)
+        file_path = os.path.join(folderPath, file_name)
         os.remove(file_path)
 
+#Daily loop
 while True:
     if env.running:
         dozenChar.setPos(dozenFood)
@@ -210,7 +210,7 @@ while True:
     else:
         vp.rate(30)    
 
-
+#result .Gif
 images = [ ]
 if len(filenames)!=0:
     for filename in filenames:
@@ -221,7 +221,8 @@ if len(filenames)!=0:
 dozenChar.countGene()
 #Graphs
 radarChart.resultChart(dozenChar.EoDStats)
-lineChart.lineResult(dozenChar.EoDStats,)
+lineChart.lineResult(dozenChar.EoDStats)
+lineChart.populationDistribution(dozenChar.chars)
 PhyloTree.show(tree_style=ts)
 
 while True:
