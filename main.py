@@ -7,6 +7,8 @@ import copy
 from ete3 import Tree, TreeStyle, NodeStyle, TextFace
 from PIL import Image
 import radarChart
+import lineChart
+import os
 
 env = environment.Enviroment(environment.envSizes)
 
@@ -87,10 +89,11 @@ class Chars:
             speedSum += self.chars[charId].genomes["speed"]
             visionSum += self.chars[charId].genomes["vision"]
             visionRadiusSum += self.chars[charId].genomes["visionRadius"]
-        avarageSpeed = speedSum / len(winners)
-        avarageVision = visionSum / len(winners)
-        avarageVisionRadius = visionRadiusSum / len(winners)
-        self.EoDStats[day] = [avarageSpeed,avarageVision,avarageVisionRadius]
+        if len(winners):
+            avarageSpeed = speedSum / len(winners)
+            avarageVision = visionSum / len(winners)
+            avarageVisionRadius = visionRadiusSum / len(winners)
+            self.EoDStats[day] = [avarageSpeed,avarageVision,avarageVisionRadius]
             
             
         
@@ -173,7 +176,16 @@ ts.show_leaf_name = True
 ts.mode = "c"
 ts.arc_start = -180
 ts.arc_span = 180
+
 filenames = []
+folder_path = "results/dailyPhyloTree/"
+file_list = os.listdir(folder_path)
+
+# Klasördeki tüm PNG dosyalarını sil
+for file_name in file_list:
+    if file_name.endswith(".png"):
+        file_path = os.path.join(folder_path, file_name)
+        os.remove(file_path)
 
 while True:
     if env.running:
@@ -184,12 +196,12 @@ while True:
             env.dozenChar = dozenChar
             env.menu.choices= env.updateMenu(dozenChar)
             
-            PhyloTree.render(f"results/Tree_day{day}.png", tree_style=ts)
-            filenames.append(f"results/Tree_day{day}.png")
+            PhyloTree.render(f"results/dailyPhyloTree/Tree_day{day}.png", tree_style=ts)
+            filenames.append(f"results/dailyPhyloTree/Tree_day{day}.png")
             
             times = 0
             day +=1
-        if day >= 15:
+        if day >= 4 or len(dozenChar.chars.keys()) == 0:
             break
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
@@ -199,16 +211,17 @@ while True:
         vp.rate(30)    
 
 
-dozenChar.countGene()
-#matplot grafiğini hem pylotreeyi aynı anda bastır.
-radarChart.resultChart(dozenChar.EoDStats)
 images = [ ]
 if len(filenames)!=0:
     for filename in filenames:
         images.append(Image.open(filename))
     width, height = images[0].size
-    images[0].save("results/result.gif", save_all=True, append_images=images[1:], duration=500, loop=0)
+    images[0].save("results/dailyPhyloTree/result.gif", save_all=True, append_images=images[1:], duration=500, loop=0)
 
+dozenChar.countGene()
+#Graphs
+radarChart.resultChart(dozenChar.EoDStats)
+lineChart.lineResult(dozenChar.EoDStats,)
 PhyloTree.show(tree_style=ts)
 
 while True:
