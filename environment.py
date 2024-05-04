@@ -63,7 +63,7 @@ class Enviroment:
             
     def updateMenu(self,dozenChar):
         self.menulist = ["default"]
-        for i in dozenChar.chars.keys():
+        for i in sorted(list(dozenChar.chars.keys())):
             self.menulist.append(str(i))
         return self.menulist 
 

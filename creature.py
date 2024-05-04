@@ -9,13 +9,21 @@ import fovCalculation
 class Creature:
     time = 0
     def __init__(self, idnumber, color=(0,0,1), speed=0.3, vision=30, visionRadius=10, axis=(1,0,0), pos = (0,1,-35)):
+        
+        self.durability = 0
         self.genomes = {
         "speed" : speed,
         "vision" : vision,
-        "visionRadius": visionRadius
+        "visionRadius": visionRadius,
         # enviromental harshness
-        # durability 
+        "durability" : 0
         }
+        
+        #durability is overall power. all attibutes reduced to 0-1 scale 
+        for spec,[min,max] in list(mutationFactors.specs.items()):
+            self.durability += self.genomes[spec]/(max-min)
+            
+        self.genomes["durability"] = self.durability
         x,y,z = axis
         r,g,b= color
         posX,posY,posZ = pos
@@ -26,7 +34,7 @@ class Creature:
         self.id = idnumber
         self.body = vp.ellipsoid(size = vp.vector(2,7,2), axis = vp.vector(x,y,z), color=vp.vector(r,g,b),pos=vp.vector(posX,posY,posZ))
         self.idText = vp.label(text=f"{idnumber}",color=vp.vector(r,g,b),pos=self.body.pos,line=True)
-    
+
         acirad = vision*vp.pi/180
         aci1 = -(acirad)/2 + vp.pi/2
         aci2 = (acirad)/2 + vp.pi/2
@@ -62,7 +70,7 @@ class Creature:
         for food,distance,angle in foods:
 
             if distance <= (self.body.size.x+food.body.radius) and not food.eat:
-                print(f"{self.id} found food: {food.id}")
+                #print(f"{self.id} found food: {food.id}")
                 self.hunger = True 
                 food.body.color = vp.color.red
                 food.eat = True
@@ -148,8 +156,17 @@ class Creature:
                 del self.angle
                 self.arc2D = vp.shapes.circle(radius=newSpec,angle1=aci1, angle2=aci2, pos= [5,-20])
                 self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,1,0)],shape= self.arc2D, opacity = 0.5, color = self.body.color/2)
+            
+            durability = 0
+            for spec,[min,max] in list(mutationFactors.specs.items()):
+                durability += self.genomes[spec]/(max-min)
+            self.durability = durability
+            self.genomes["durability"] = self.durability
+        
         speed, vision, visionRadius = self.genomes["speed"],self.genomes["vision"],self.genomes["visionRadius"]
         self.gene = f"{speed:.2f}-{vision:.2f}-{visionRadius:.2f}"
+        
+        
         return mutationState
 
 class Food:

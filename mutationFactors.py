@@ -4,7 +4,8 @@ mutationProbability = 0.35 #0-1
 specs = {
 "speed": [0.2,2], 
 "vision" : [10,90],
-"visionRadius":[2,30]
+"visionRadius":[2,30],
+"durability":[0,3]
 }
 
 
@@ -21,7 +22,7 @@ def mutationChance():
         return False, None, None
 
 def chooseSpec():
-    whichSpec = random.randint(0,len(specs)-1)
+    whichSpec = random.randint(0,len(specs)-2)
     specslist = list(specs.keys())
     return specslist[whichSpec]
     

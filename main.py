@@ -9,6 +9,7 @@ from PIL import Image
 import radarChart
 import lineChart
 import os
+import naturalDisasters
 
 env = environment.Enviroment(environment.envSizes)
 
@@ -84,17 +85,15 @@ class Chars:
         return winners, losers
         
     def dailyStats(self, winners):
-        speedSum, visionSum,visionRadiusSum = 0,0,0
-        for charId in winners:
-            speedSum += self.chars[charId].genomes["speed"]
-            visionSum += self.chars[charId].genomes["vision"]
-            visionRadiusSum += self.chars[charId].genomes["visionRadius"]
+        
         if len(winners):
-            avarageSpeed = speedSum / len(winners)
-            avarageVision = visionSum / len(winners)
-            avarageVisionRadius = visionRadiusSum / len(winners)
-            self.EoDStats[day] = [avarageSpeed,avarageVision,avarageVisionRadius]
+            sumS = {name: 0 for name in list(self.chars[winners[0]].genomes.keys())}
+            for charId in winners:
+                for isim in list(sumS.keys()):
+                    sumS[isim] +=self.chars[charId].genomes[isim] 
             
+            self.EoDStats[day] = [values/len(winners) for values in list(sumS.values())]
+
             
         
     def resetPos(self):
@@ -115,11 +114,11 @@ class Chars:
             i +=1
     
     def endofDay(self,Foods):
-        print("End of The Day", day)
+        #print("End of The Day", day)
         winners, losers = self.results()
-        print("Results:")
-        print("Winners:", winners)
-        print("Losers:", losers)
+        #print("Results:")
+        #print("Winners:", winners)
+        #print("Losers:", losers)
         #time.sleep(2)
         Foods.restartFoods()
         self.resetPos()
@@ -186,6 +185,9 @@ for file_name in fileList:
         file_path = os.path.join(folderPath, file_name)
         os.remove(file_path)
 
+
+disasters = naturalDisasters.Disasters()
+
 #Daily loop
 while True:
     if env.running:
@@ -201,7 +203,7 @@ while True:
             
             times = 0
             day +=1
-        if day >= 4 or len(dozenChar.chars.keys()) == 0:
+        if day >= 25 or len(dozenChar.chars.keys()) == 0:
             break
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
