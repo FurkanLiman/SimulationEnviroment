@@ -48,12 +48,11 @@ def populationDistribution(chars):
         plt.figure(figsize=(15, 5))
 
         for i, (var, params) in enumerate(specs.items(), start=1):
-        # Aralıkları hesapla
+            
             minVal,maxVal = params
             intervalSize = (maxVal - minVal) / 10
             intervals = [(minVal + i * intervalSize, minVal + (i + 1) * intervalSize) for i in range(10)]
-    
-            # Her aralık için kaç adet örnek olduğunu hesapla
+
             counts = [0] * 10
             for value in [chars[id].genomes[var] for id in chars]:
                 for j, (start, end) in enumerate(intervals):
@@ -61,7 +60,6 @@ def populationDistribution(chars):
                         counts[j] += 1
                         break
 
-            # Dağılım grafiğini çiz
             plt.subplot(1, len(variables), i)
             plt.bar(range(1, 11), counts, color='skyblue')
             plt.title(var)

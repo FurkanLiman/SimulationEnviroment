@@ -19,7 +19,7 @@ class Creature:
         x,y,z = axis
         r,g,b= color
         posX,posY,posZ = pos
-        #every creature has own DNA Speed*100+vision*100+visionRadius*100 gen işini düzelt
+
         self.gene = f"{speed:.2f}-{vision:.2f}-{visionRadius:.2f}"
     
         self.hunger = False
