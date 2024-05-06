@@ -55,6 +55,8 @@ def populationDistribution(chars):
 
             counts = [0] * 10
             for value in [chars[id].genomes[var] for id in chars]:
+                if var == "immunity":
+                    value = len(value)
                 for j, (start, end) in enumerate(intervals):
                     if start <= value < end:
                         counts[j] += 1

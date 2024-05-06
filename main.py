@@ -90,7 +90,11 @@ class Chars:
             sumS = {name: 0 for name in list(self.chars[winners[0]].genomes.keys())}
             for charId in winners:
                 for isim in list(sumS.keys()):
-                    sumS[isim] +=self.chars[charId].genomes[isim] 
+                    if isim == "immunity":
+                        sumS[isim] +=len(self.chars[charId].genomes[isim])
+                    else:
+                        sumS[isim] +=self.chars[charId].genomes[isim] 
+                    
             
             self.EoDStats[day] = [values/len(winners) for values in list(sumS.values())]
 
@@ -136,7 +140,12 @@ class Chars:
             totalText.fgcolor="red"
             genePool[i].add_face(totalText, column=1, position = "branch-bottom")
 
-            
+    def lookSickness(self):
+        for id in self.chars.keys():
+            self.chars[id].sickness()
+    def lookHeal(self):
+        for id in self.chars.keys():
+            self.chars[id].heal()
             
 class Foods:
     foods = {}
@@ -186,24 +195,42 @@ for file_name in fileList:
         os.remove(file_path)
 
 
-disasters = naturalDisasters.Disasters()
-
+#disasters = naturalDisasters.Disasters()
+dayLength = 24*60
+isDisaster = False
 #Daily loop
 while True:
     if env.running:
         dozenChar.setPos(dozenFood)
+        if isDisaster:
+            dozenChar.chars,isDisaster = disasters.collideCheck(dozenChar.chars)
+            dozenChar.lookSickness()
         
-        if times >=24*60:
+        if times >= dayLength:
+            dozenChar.lookHeal()
+            
             dozenChar.endofDay(dozenFood)
             env.dozenChar = dozenChar
             env.menu.choices= env.updateMenu(dozenChar)
+            
+            # afet oranını al ve burada hesapla laızm olunca burada afet olustur.afet süresi de olsun
+            disasterPossibility = 1 # bu değeri arayüzden al. her gün afet oluşma olaslığı
+            disasterHarsness = 2.5 # bu değeri arayüzden al (skala ile çevrenin zorluğu ayarla örn : 3 lethal, 2-3 harmfull(2 3 arası değerin boyutuna göre etki de artıp azalsın))
+            disasterRandom = random.random()
+            isDisaster = False
+            if disasterRandom<disasterPossibility:
+                isDisaster = True
+                disasterTime = random.randint(0,int(dayLength*0.7))
+                disasters = naturalDisasters.Disasters(disasterHarsness,disasterTime)
+                print(disasters.category)
+
             
             PhyloTree.render(f"results/dailyPhyloTree/Tree_day{day}.png", tree_style=ts)
             filenames.append(f"results/dailyPhyloTree/Tree_day{day}.png")
             
             times = 0
             day +=1
-        if day >= 25 or len(dozenChar.chars.keys()) == 0:
+        if day >= 5 or len(dozenChar.chars.keys()) == 0:
             break
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
