@@ -4,7 +4,7 @@ mutationProbability = 0.35 #0-1
 specs = {
 "speed": [0.2,2], 
 "vision" : [10,90],
-"visionRadius":[2,30],
+"visionRadius":[10,30],
 "immunity":[0,10],
 "durability":[0,3]
 }

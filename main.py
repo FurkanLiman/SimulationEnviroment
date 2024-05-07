@@ -171,8 +171,8 @@ class Foods:
             food = creature.Food(pos=pos, id=i)
             self.foods[i] = food
         
-dozenChar = Chars(2)
-dozenFood = Foods(20)
+dozenChar = Chars(10)
+dozenFood = Foods(70)
 
 env.dozenChar = dozenChar
 env.menu.choices= env.updateMenu(dozenChar)
@@ -214,15 +214,14 @@ while True:
             env.menu.choices= env.updateMenu(dozenChar)
             
             # afet oranını al ve burada hesapla laızm olunca burada afet olustur.afet süresi de olsun
-            disasterPossibility = 1 # bu değeri arayüzden al. her gün afet oluşma olaslığı
-            disasterHarsness = 2.5 # bu değeri arayüzden al (skala ile çevrenin zorluğu ayarla örn : 3 lethal, 2-3 harmfull(2 3 arası değerin boyutuna göre etki de artıp azalsın))
+            disasterHarsness = env.disasterHarsness # (1-3)bu değeri arayüzden al (skala ile çevrenin zorluğu ayarla örn : 3 lethal, 2-3 harmfull(2 3 arası değerin boyutuna göre etki de artıp azalsın))
             disasterRandom = random.random()
             isDisaster = False
-            if disasterRandom<disasterPossibility:
+            if disasterRandom<env.disasterPossibility:
                 isDisaster = True
                 disasterTime = random.randint(0,int(dayLength*0.7))
                 disasters = naturalDisasters.Disasters(disasterHarsness,disasterTime)
-                print(disasters.category)
+            
 
             
             PhyloTree.render(f"results/dailyPhyloTree/Tree_day{day}.png", tree_style=ts)
@@ -230,7 +229,7 @@ while True:
             
             times = 0
             day +=1
-        if day >= 5 or len(dozenChar.chars.keys()) == 0:
+        if day >= 15 or len(dozenChar.chars.keys()) == 0:
             break
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"

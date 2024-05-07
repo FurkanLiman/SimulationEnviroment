@@ -133,6 +133,8 @@ class Creature:
                     
     def mutation(self):
         mutationState,winnerSpec,newSpec = mutationFactors.mutationChance()
+        if winnerSpec == "durability":
+            mutationState = False
         if mutationState:
             self.body.color = vp.vector(random.randint(0,100)/100, random.randint(0,100)/100, random.randint(0,100)/100)    
             self.idText.color = self.body.color
@@ -155,15 +157,18 @@ class Creature:
         
         return mutationState
 
-    def updateAttribute(self,attribute, newSpec):
+    def updateAttribute(self,attribute, newSpec=1,byfactor=1):
         if attribute == "immunity":
             
             if random.randint(0,1):
                 if len(self.genomes["immunity"]) >1:
-                    self.genomes["immunity"].pop(random.randint(1,len(self.genomes["immunity"])))
+                    self.genomes["immunity"].pop(random.randint(1,len(self.genomes["immunity"])-1))
             else:
                     self.genomes["immunity"].append(random.randint(1,mutationFactors.specs["immunity"][1]))
         else:
+            if byfactor != 1:
+                newSpec =  self.genomes[attribute] * byfactor
+            
             self.genomes[attribute] = newSpec
         if attribute == "speed":
             self.genomes["speed"] = newSpec
@@ -191,19 +196,22 @@ class Creature:
     
     def sickness(self):
         for category, [value,permanent,immunity, isAlreadySick] in self.diseased.items():
-            if isAlreadySick:
-                newValue =  self.genomes[category] * value
-                self.updateAttribute(category,newValue)
+            if not isAlreadySick:
+                print(self.id,"hasta: ",self.genomes[category])
+                self.updateAttribute(category,value,byfactor=value)
+                print("yeni değer:", self.genomes[category])
+                self.diseased[category][3] = True
                 # üstünde yazı çıksın hastalığıyla ilgili
 
 
     def heal(self):
         for category, [value,permanent, immunity, isAlreadySick] in self.diseased.items():
             if not permanent:   
-                newValue = self.genomes[category] * (1/value)
-                self.updateAttribute(category,newValue)            
+                print(self.id, "iyileşti", "eski: ",self.genomes[category])
+                self.updateAttribute(category,value, byfactor=1/value)
+                print("yeni: ",self.genomes[category])
             else:
-                # rengi değişsin
+                # rengi değişsin yeni tür olsun yani
                 pass
             
             if immunity not in self.genomes["immunity"]:

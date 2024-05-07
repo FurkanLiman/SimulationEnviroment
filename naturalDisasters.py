@@ -8,7 +8,7 @@ from mutationFactors import specs
 # instant disasters - not permanent effect - slowing, getting blind - another color
 # all disasters must have posibilities with selection (user can select danger and frequency)
 class Disasters:
-    sizeRatio = [0.3,0.5]    # Minimum and maximum size range, relative to the entire area. 
+    sizeRatio = [0.2,0.3]    # Minimum and maximum size range, relative to the entire area. 
     def __init__(self, disasterHarsness=0,disasterTime=720):
         
         areaRatio =  random.randint(int(self.sizeRatio[0]*100),int(self.sizeRatio[1]*100))/100
@@ -22,14 +22,19 @@ class Disasters:
         self.posY = random.randint(min(posYs),max(posYs))
 
         self.disasterHarsness =  disasterHarsness
-        self.harsnessLevel = (self.disasterHarsness-2)*3
         self.disasterTime = disasterTime
         
-        if disasterHarsness >= 2.9:
+        if disasterHarsness == 1:
+            disasterHarsness = random.randint(11,30)/10
+        
+        self.lethalChars = []
+        if disasterHarsness >= 2.8:
             self.lethalDisaster()
-        elif disasterHarsness < 2.9 and  disasterHarsness>=2:
+        elif disasterHarsness < 2.8 and  disasterHarsness>=2:
+            self.harsnessLevel = (self.disasterHarsness-2)*3
             self.harmfulDisaster()
-        else:
+        elif disasterHarsness <2 and disasterHarsness >=1:
+            self.harsnessLevel = (self.disasterHarsness-1)
             self.instantDisasters()
         
     def lethalDisaster(self):
@@ -50,56 +55,63 @@ class Disasters:
                 distancePythagor = (distances.x**2+distances.y**2+distances.z**2)**(0.5)
                 if  (distancePythagor<=(self.radius/2)):                
                     charlist.append(id)
-            
-            for id in charlist:
-                if not chars[id].diseased:
+                    
+            if self.state == 2:
+                leavin = [item for item in self.lethalChars if item not in charlist]
+                enterin = [item for item in charlist if item not in self.lethalChars]
+                self.lethalChars = charlist
+                for id in enterin:
+                    chars[id].updateAttribute(self.category, byfactor=1-self.harsnessLevel)
+                for id in leavin:
+                    chars[id].updateAttribute(self.category, byfactor=(1/(1-self.harsnessLevel)))
+            else:
+                for id in charlist:
+                    if not chars[id].diseased:
 
-                    if self.state==0: # lethal disaster    
-                        chars[id].unVisible()
-                        del chars[id].body
-                        del chars[id].idText
-                        del chars[id].angle
-                        chars.pop(id)
-                    elif self.state == 1: # harmful disaster
-                        
-                        if (self.immunity in chars[id].genomes["immunity"]) and (self.harsnessLevel <= chars[id].durability):
-                            # bağ + , direnç +
-                            chars[id].diseased[self.category] = [1-(self.harsnessLevel/6),False,self.immunity,False]
+                        if self.state==0: # lethal disaster    
+                            chars[id].unVisible()
+                            del chars[id].body
+                            del chars[id].idText
+                            del chars[id].angle
+                            chars.pop(id)
+                        elif self.state == 1: # harmful disaster
                             
-                        elif not (self.immunity in chars[id].genomes["immunity"]) and (self.harsnessLevel <= chars[id].durability):
-                            # bağ - , direnç +
-                            chars[id].diseased[self.category] = [1-(self.harsnessLevel/3),False, self.immunity,False]
-                        else:
-                            # bağ - , direnç -
-                            if random.randint(0,1):
-                                chars[id].diseased[self.category] = [1-(self.harsnessLevel/3),True, self.immunity,False]
+                            if (self.immunity in chars[id].genomes["immunity"]) and (self.harsnessLevel <= chars[id].durability):
+                                # bağ + , direnç +
+                                print("az Hasar - geçici")
+                                chars[id].diseased[self.category] = [1-(self.harsnessLevel/6),False,self.immunity,False]
+                                
+                            elif not (self.immunity in chars[id].genomes["immunity"]) and (self.harsnessLevel <= chars[id].durability):
+                                # bağ - , direnç +
+                                print("orta hasar - geçici + bağışıklık")
+                                chars[id].diseased[self.category] = [1-(self.harsnessLevel/3),False, self.immunity,False]
                             else:
-                                chars[id].unVisible()
-                                del chars[id].body
-                                del chars[id].idText
-                                del chars[id].angle
-                                chars.pop(id)
+                                # bağ - , direnç -
+                                if random.randint(0,1):
+                                    print("orta hasar - kalıcı")
+                                    chars[id].diseased[self.category] = [1-(self.harsnessLevel/3),True, self.immunity,False]
+                                else:
+                                    print("ölüm")
+                                    chars[id].unVisible()
+                                    del chars[id].body
+                                    del chars[id].idText
+                                    del chars[id].angle
+                                    chars.pop(id)
+                            """
+                            # disability ekle ve renk değiştir geni de güncelle. eğer belirli bir oranda özürü varsa üreyemez.
+                            # ileride bağışıklığı olup olmamasına göre özür kazanmaya bakacak. eğer bağışıklığı varsa bir daha bu alanda etkilenmeyecek.
+                            # (afet herhangi bir alanda olabilir vision, speed gibi)
+                            # bağışıklık dizisi [] olacak içersinde bağışıklık bulundurduğu afet proteini olacak x canlısı [a,b,c] hastalığına bağışıklı gibi.
                             
-                        
-                        
-                        # disability ekle ve renk değiştir geni de güncelle. eğer belirli bir oranda özürü varsa üreyemez.
-                        # ileride bağışıklığı olup olmamasına göre özür kazanmaya bakacak. eğer bağışıklığı varsa bir daha bu alanda etkilenmeyecek.
-                        # (afet herhangi bir alanda olabilir vision, speed gibi)
-                        # bağışıklık dizisi [] olacak içersinde bağışıklık bulundurduğu afet proteini olacak x canlısı [a,b,c] hastalığına bağışıklı gibi.
-                        
-                        # oluşan hastlaığüın bir kuvveti olacak durab ile karşılaştıurılacak
-                        # canlı girdiği afetten sonra 3 şey olabilir:
-                        
-                        # eğer bağışıklığı varsa ve durability yüksekse, hastalığı çok az etkiyle tur sonuna kadar sahip olur ve sonraki güne düzelir.
-                        # eğer bağışıklığı yoksa ve durabilty yüksekse, o tur dezavantajlı kalıp sonraki tura düzelir ve bağışıklık kazanabilir.
-                        # eğer bağışıklığı yoksa ve durability düşükse, şansa bağlı 2 seçenek var:
-                        # ya ölür, 
-                        # ya da yaşar ama özür kalıcı hale geçer ve yeni bir özürlü sülale oluşur.
-                        
-                    else: 
-                        # instant soft disasters
-                        pass
-            
+                            # oluşan hastlaığüın bir kuvveti olacak durab ile karşılaştıurılacak
+                            # canlı girdiği afetten sonra 3 şey olabilir:
+                            
+                            # eğer bağışıklığı varsa ve durability yüksekse, hastalığı çok az etkiyle tur sonuna kadar sahip olur ve sonraki güne düzelir.
+                            # eğer bağışıklığı yoksa ve durabilty yüksekse, o tur dezavantajlı kalıp sonraki tura düzelir ve bağışıklık kazanabilir.
+                            # eğer bağışıklığı yoksa ve durability düşükse, şansa bağlı 2 seçenek var:
+                            # ya ölür, 
+                            # ya da yaşar ama özür kalıcı hale geçer ve yeni bir özürlü sülale oluşur."""
+
             return chars,True
         else:
             self.disasterTime = 0
@@ -120,7 +132,10 @@ class Disasters:
 
     def instantDisasters(self):
         self.state = 2
-        self.category = random.choice(list(specs.keys()))
+        keys = list(specs.keys())
+        keys.remove("immunity")
+        keys.remove("durability")
+        self.category = random.choice(keys)
         self.body = vp.cylinder(pos=vp.vector(self.posX,1,self.posY),
                                 size=vp.vector(2,self.radius,self.radius), 
                                 axis=vp.vector(0,-1,0),

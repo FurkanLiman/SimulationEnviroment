@@ -3,7 +3,7 @@ from time import *
 import mutationFactors
 
 #1800*900
-envSizes = 70,1,70
+envSizes = 200,1,200
 
 
 
@@ -15,14 +15,26 @@ class Enviroment:
         vp.button(text="Pause", pos=self.scene.title_anchor, bind=self.Run)
         vp.wtext(text= "    |   ", pos = self.scene.title_anchor)
         vp.checkbox(text="Show View Angles    ", pos = self.scene.title_anchor, bind=self.showAngles)
-        vp.wtext(text='|    Vary the speedrate', pos= self.scene.title_anchor, color = vp.color.red)
+        vp.wtext(text='|    Vary Speedrate', pos= self.scene.title_anchor, color = vp.color.red)
         self.speed = vp.slider(min=5, max=200, value=30, length=220,pos=self.scene.title_anchor, bind=self.setSpeed, right=15)
         self.speedText = vp.wtext(text='{:1.2f}'.format(self.speed.value), pos= self.scene.title_anchor)
         self.dayInfo = vp.wtext(text= "    |    Time= 00:00    Day= 0", pos = self.scene.title_anchor)
-        vp.wtext(text= "    |    MutationRate:", pos = self.scene.title_anchor)
+        vp.wtext(text= "\nMutation Settings :   MutationPossibility:      ", pos = self.scene.title_anchor)
         self.mutationRate = vp.slider(min=0, max=1000, value=5, length=220,pos=self.scene.title_anchor, bind=self.setMutationRate, right=15, text= "sea")
         self.mutationRateText = vp.wtext(text='{:1.2f}'.format(self.mutationRate.value/1000), pos= self.scene.title_anchor)
         mutationFactors.mutationProbability = self.mutationRate.value/1000
+        
+        vp.wtext(text= "\nDisease  Settings :   DailyDisasterPossibility:", pos = self.scene.title_anchor)
+        self.disasterPossibilityS = vp.slider(min=0, max=1000, value=250, length=220,pos=self.scene.title_anchor, bind=self.setDisasterPossibility, right=15, text= "sea")
+        self.disasterPossibilityText = vp.wtext(text='{:1.2f}'.format(self.disasterPossibilityS.value/1000), pos= self.scene.title_anchor)
+        self.disasterPossibility = self.disasterPossibilityS.value/1000
+        
+        vp.wtext(text= "    |    DiseaseHarsness:", pos = self.scene.title_anchor)
+        self.disasterHarsnessS = vp.slider(min=1000, max=3000, value=1000, length=220,pos=self.scene.title_anchor, bind=self.setDisasterHarsness, right=15, text= "sea")
+        self.disasterHarsnessText = vp.wtext(text='{:1.2f}'.format(self.disasterHarsnessS.value/1000), pos= self.scene.title_anchor)
+        self.disasterHarsness = self.disasterHarsnessS.value/1000
+        vp.wtext(text= "  ->   1 : Random    |    (1-2) : Temporary Physical Events    |    [2-2.8) : Permanent Immune Diseases    |    [2.8-3] : Lethal Diseases", pos = self.scene.title_anchor)
+        
         
         self.running = True
         self.menulist = ["default"]
@@ -35,6 +47,14 @@ class Enviroment:
         self.running = not self.running
         if self.running: b.text = "Pause"
         else: b.text = "Run"
+
+    def setDisasterHarsness(self, d):
+        self.disasterHarsness = d.value /1000
+        self.disasterHarsnessText.text = '{:1.3f}'.format(d.value/1000)
+
+    def setDisasterPossibility(self, d):
+        self.disasterPossibility = d.value /1000
+        self.disasterPossibilityText.text = '{:1.3f}'.format(d.value/1000)
 
     def setMutationRate(self, d):
         mutationFactors.mutationProbability = d.value /1000
