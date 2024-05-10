@@ -60,7 +60,7 @@ def lineResult(EoDStats, population):
                 disastersHarmful.append(None)
                 disastersInstant.append(None)
                     
-        plt.plot(dayss,populations,label=["population","winners","losers"])
+        plt.plot(dayss,populations,label=["Population","Livings","Deads"])
         plt.scatter(dayss, disastersLethal, color='red', label='Lethal Disasters',s=150)
         plt.scatter(dayss, disastersHarmful, color='orange', label='Harmful Disasters',s=150)
         plt.scatter(dayss, disastersInstant, color='yellow', label='Instant Disasters',s=150)
