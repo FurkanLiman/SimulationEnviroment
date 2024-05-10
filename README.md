@@ -1,3 +1,5 @@
 # SimulationEnviroment
 
-![ezgif com-video-to-gif-converted](https://github.com/FurkanLiman/SimulationEnviroment/assets/71287062/b5b7e6d8-1a44-4b40-9efb-2409997e3499)
+![Screenshot_1](https://github.com/FurkanLiman/SimulationEnviroment/assets/71287062/706ce81a-f4dd-4e5c-987f-ba982aa1e155)
+
+![image](https://github.com/FurkanLiman/SimulationEnviroment/assets/71287062/32e2120c-187a-48b5-8933-d89fccf60703)
