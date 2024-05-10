@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from mutationFactors import specs
 
-def lineResult(EoDStats):
+def lineResult(EoDStats, population):
     
     if len(list(EoDStats.values())):
         days = list(EoDStats.keys())
@@ -9,7 +9,7 @@ def lineResult(EoDStats):
 
         plt.figure(figsize=(10, 10))
 
-        plt.subplot(2, 1, 1)
+        plt.subplot(3, 1, 1)
         
         for i, category in enumerate(specs.keys()):
             plt.plot(days, [data[i] for data in allStats], label=category)
@@ -21,7 +21,7 @@ def lineResult(EoDStats):
         plt.grid(True)
         plt.xticks(days)
 
-        plt.subplot(2, 1, 2)
+        plt.subplot(3, 1, 2)
 
         changeRates = []
         for i in range(len(allStats[0])):
@@ -34,11 +34,48 @@ def lineResult(EoDStats):
         plt.xticks(range(1, len(changeRates) + 1), [f"{i}" for i in specs.keys()])
         plt.grid(axis='y')
 
+        plt.subplot(3, 1, 3)
+
+        dayss = list(population.keys())
+        populations = []
+        disastersLethal =[]
+        disastersHarmful =[]
+        disastersInstant = []
+        for days,[total, winner, loser, isdisaster] in population.items():
+            populations.append([total,winner,loser])
+            if isdisaster == 1:
+                disastersLethal.append(total)
+                disastersHarmful.append(None)
+                disastersInstant.append(None)
+            elif isdisaster ==2:
+                disastersLethal.append(None)
+                disastersHarmful.append(total)
+                disastersInstant.append(None)
+            elif isdisaster ==3:
+                disastersLethal.append(None)
+                disastersHarmful.append(None)
+                disastersInstant.append(total)
+            else:
+                disastersLethal.append(None)
+                disastersHarmful.append(None)
+                disastersInstant.append(None)
+                    
+        plt.plot(dayss,populations,label=["population","winners","losers"])
+        plt.scatter(dayss, disastersLethal, color='red', label='Lethal Disasters',s=150)
+        plt.scatter(dayss, disastersHarmful, color='orange', label='Harmful Disasters',s=150)
+        plt.scatter(dayss, disastersInstant, color='yellow', label='Instant Disasters',s=150)
+
+        plt.title('Daily pop')
+        plt.xlabel('Day')
+        plt.ylabel('pop')
+        plt.legend()
+        plt.grid(True)
+        plt.xticks(dayss)
+        
         plt.tight_layout()
         plt.savefig("results/lineResult.png")
         plt.show(block=False)
     
-
 def populationDistribution(chars):
     
     if len(list(chars.keys())):

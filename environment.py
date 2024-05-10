@@ -3,7 +3,7 @@ from time import *
 import mutationFactors
 
 #1800*900
-envSizes = 200,1,200
+envSizes = 150,1,150
 
 
 

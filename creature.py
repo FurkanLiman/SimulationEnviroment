@@ -10,29 +10,20 @@ class Creature:
     time = 0
     def __init__(self, idnumber, color=(0,0,1), speed=0.3, vision=30, visionRadius=10, axis=(1,0,0), pos = (0,1,-35)):
         
-        self.durability = 0
         self.genomes = {
         "speed" : speed,
         "vision" : vision,
         "visionRadius": visionRadius,
         "immunity":[0],
-        # enviromental harshness
         "durability" : 0
         }
         self.diseased = {}
+        
         #durability is overall power. all attibutes reduced to 0-1 scale 
-        for spec,[min,max] in list(mutationFactors.specs.items()):
-            if spec == "immunity":
-                self.durability += len(self.genomes[spec])/(max-min)
-            else:            
-                self.durability += self.genomes[spec]/(max-min)
-            
-        self.genomes["durability"] = self.durability
+        
         x,y,z = axis
         r,g,b= color
         posX,posY,posZ = pos
-
-        self.gene = f"{speed:.2f}-{vision:.2f}-{visionRadius:.2f}"
     
         self.hunger = False
         self.id = idnumber
@@ -50,6 +41,8 @@ class Creature:
         self.angle.pos.x = (visionRadius/2)*x + self.body.pos.x
         self.angle.pos.z = (visionRadius/2)*z + self.body.pos.z
         self.angle.axis = self.body.axis
+        
+        self.updateGeneDurability()
         
     def unVisible(self):
         self.body.visible = False
@@ -136,30 +129,16 @@ class Creature:
         if winnerSpec == "durability":
             mutationState = False
         if mutationState:
+            #print(f"{self.id}: Got Mutation for --{winnerSpec}-- old spec:{self.genomes[winnerSpec]} -- new:{newSpec}")
+            self.updateAttribute(winnerSpec,newSpec)
+            self.updateGeneDurability()
             self.body.color = vp.vector(random.randint(0,100)/100, random.randint(0,100)/100, random.randint(0,100)/100)    
             self.idText.color = self.body.color
-            #print(f"{self.id}: Got Mutation for --{winnerSpec}-- old spec:{self.genomes[winnerSpec]} -- new:{newSpec}")
             
-            self.updateAttribute(winnerSpec,newSpec)
-            durability = 0
-
-            for spec,[min,max] in mutationFactors.specs.items():
-                if spec == "immunity":
-                    durability += len(self.genomes[spec])/(max-min)
-                else:            
-                    durability += self.genomes[spec]/(max-min)
-            self.durability = durability
-            self.genomes["durability"] = self.durability
-        
-        speed, vision, visionRadius = self.genomes["speed"],self.genomes["vision"],self.genomes["visionRadius"]
-        self.gene = f"{speed:.2f}-{vision:.2f}-{visionRadius:.2f}"
-        
-        
         return mutationState
 
     def updateAttribute(self,attribute, newSpec=1,byfactor=1):
         if attribute == "immunity":
-            
             if random.randint(0,1):
                 if len(self.genomes["immunity"]) >1:
                     self.genomes["immunity"].pop(random.randint(1,len(self.genomes["immunity"])-1))
@@ -174,6 +153,8 @@ class Creature:
             self.genomes["speed"] = newSpec
         elif attribute == "vision":
             self.genomes["vision"] = newSpec
+            if newSpec <= 3:
+                newSpec = 6
             acirad = newSpec*vp.pi/180
             aci1 = -(acirad)/2 + vp.pi/2
             aci2 = (acirad)/2 + vp.pi/2
@@ -184,6 +165,8 @@ class Creature:
             self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,1,0)],shape= self.arc2D, opacity = 0.5, color = self.body.color/2)
         elif attribute == "visionRadius":
             self.genomes["visionRadius"] = newSpec
+            if newSpec <= 5:
+                newSpec = 10
             acirad = self.genomes["vision"]*vp.pi/180
             aci1 = -(acirad)/2 + vp.pi/2
             aci2 = (acirad)/2 + vp.pi/2
@@ -192,31 +175,52 @@ class Creature:
             del self.angle
             self.arc2D = vp.shapes.circle(radius=newSpec,angle1=aci1, angle2=aci2, pos= [5,-20])
             self.angle = vp.extrusion(path=[vp.vec(0,0,0), vp.vec(0,1,0)],shape= self.arc2D, opacity = 0.5, color = self.body.color/2)
+            
+    def updateGeneDurability(self):
+        durability = 0
+        normalize = {}
+        for spec,[min,max] in mutationFactors.specs.items():
+            if spec == "immunity":
+                durability += len(self.genomes[spec])/(max-min)
+            elif spec != "durability":            
+                durability += self.genomes[spec]/(max-min)
+                normalize[spec] = (self.genomes[spec] - min) / (max- min)
+        self.durability = durability
+        self.genomes["durability"] = durability
+        speed, vision, visionRadius = self.genomes["speed"],self.genomes["vision"],self.genomes["visionRadius"]
+        self.gene = f"{speed:.2f}-{vision:.2f}-{visionRadius:.2f}-["+''.join(map(str, self.genomes["immunity"]))+"]"
+        self.body.color = vp.vector(normalize["speed"], normalize["vision"],normalize["visionRadius"])    
+        self.idText.color = self.body.color
 
     
     def sickness(self):
         for category, [value,permanent,immunity, isAlreadySick] in self.diseased.items():
             if not isAlreadySick:
-                print(self.id,"hasta: ",self.genomes[category])
+                #print(self.id,"hasta: ",self.genomes[category])
                 self.updateAttribute(category,value,byfactor=value)
-                print("yeni değer:", self.genomes[category])
+                #print("yeni değer:", self.genomes[category])
                 self.diseased[category][3] = True
-                # üstünde yazı çıksın hastalığıyla ilgili
+                perOrTemp = "Permanent" if permanent else "Temporary"
+                self.idText.text += f" - {category} - {perOrTemp}"
 
 
     def heal(self):
+        state = False
         for category, [value,permanent, immunity, isAlreadySick] in self.diseased.items():
+            self.idText.text = self.idText.text.split(" - ")[0]
+            state = permanent
             if not permanent:   
-                print(self.id, "iyileşti", "eski: ",self.genomes[category])
+                #print(self.id, "iyileşti", "eski: ",self.genomes[category])
                 self.updateAttribute(category,value, byfactor=1/value)
-                print("yeni: ",self.genomes[category])
+                #print("yeni: ",self.genomes[category])
             else:
-                # rengi değişsin yeni tür olsun yani
-                pass
+                self.updateGeneDurability()
+            
             
             if immunity not in self.genomes["immunity"]:
                 self.genomes["immunity"].append(immunity)
         self.diseased = {}
+        return state
             
 class Food:
     def __init__(self, id,size=.75, pos=(0,0,0)):

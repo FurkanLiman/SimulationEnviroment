@@ -5,10 +5,11 @@ from mutationFactors import specs
 
 # lethal disasters - permanent effect - red
 # harmful disasters - permanent effect - yellow-orange
-# instant disasters - not permanent effect - slowing, getting blind - another color
+# instant disasters - not permanent effect - slowing, getting blind 
 # all disasters must have posibilities with selection (user can select danger and frequency)
+# chars in disaster will be marked
 class Disasters:
-    sizeRatio = [0.2,0.3]    # Minimum and maximum size range, relative to the entire area. 
+    sizeRatio = [0.15,0.30]    # Minimum and maximum size range, relative to the entire area. 
     def __init__(self, disasterHarsness=0,disasterTime=720):
         
         areaRatio =  random.randint(int(self.sizeRatio[0]*100),int(self.sizeRatio[1]*100))/100
@@ -24,27 +25,19 @@ class Disasters:
         self.disasterHarsness =  disasterHarsness
         self.disasterTime = disasterTime
         
-        if disasterHarsness == 1:
-            disasterHarsness = random.randint(11,30)/10
+        if self.disasterHarsness == 1:
+            self.disasterHarsness = random.randint(11,30)/10
         
         self.lethalChars = []
-        if disasterHarsness >= 2.8:
+        if self.disasterHarsness >= 2.8:
             self.lethalDisaster()
-        elif disasterHarsness < 2.8 and  disasterHarsness>=2:
+        elif self.disasterHarsness < 2.8 and  self.disasterHarsness>=2:
             self.harsnessLevel = (self.disasterHarsness-2)*3
             self.harmfulDisaster()
-        elif disasterHarsness <2 and disasterHarsness >=1:
+        elif self.disasterHarsness <2 and self.disasterHarsness >=1:
             self.harsnessLevel = (self.disasterHarsness-1)
             self.instantDisasters()
-        
-    def lethalDisaster(self):
-        self.state = 0
-        self.body = vp.cylinder(pos=vp.vector(self.posX,1,self.posY),
-                                size=vp.vector(2,self.radius,self.radius), 
-                                axis=vp.vector(0,-1,0),
-                                color= vp.color.red,
-                                opacity = 0.5) # topla burayı yükseklikler dengesiz
-        
+          
     def collideCheck(self, chars):
         self.disasterTime -= 1
 
@@ -78,18 +71,16 @@ class Disasters:
                             
                             if (self.immunity in chars[id].genomes["immunity"]) and (self.harsnessLevel <= chars[id].durability):
                                 # bağ + , direnç +
-                                print("az Hasar - geçici")
                                 chars[id].diseased[self.category] = [1-(self.harsnessLevel/6),False,self.immunity,False]
                                 
                             elif not (self.immunity in chars[id].genomes["immunity"]) and (self.harsnessLevel <= chars[id].durability):
                                 # bağ - , direnç +
-                                print("orta hasar - geçici + bağışıklık")
                                 chars[id].diseased[self.category] = [1-(self.harsnessLevel/3),False, self.immunity,False]
                             else:
                                 # bağ - , direnç -
                                 if random.randint(0,1):
-                                    print("orta hasar - kalıcı")
                                     chars[id].diseased[self.category] = [1-(self.harsnessLevel/3),True, self.immunity,False]
+                                    
                                 else:
                                     print("ölüm")
                                     chars[id].unVisible()
@@ -98,37 +89,43 @@ class Disasters:
                                     del chars[id].angle
                                     chars.pop(id)
                             """
-                            # disability ekle ve renk değiştir geni de güncelle. eğer belirli bir oranda özürü varsa üreyemez.
-                            # ileride bağışıklığı olup olmamasına göre özür kazanmaya bakacak. eğer bağışıklığı varsa bir daha bu alanda etkilenmeyecek.
-                            # (afet herhangi bir alanda olabilir vision, speed gibi)
-                            # bağışıklık dizisi [] olacak içersinde bağışıklık bulundurduğu afet proteini olacak x canlısı [a,b,c] hastalığına bağışıklı gibi.
-                            
-                            # oluşan hastlaığüın bir kuvveti olacak durab ile karşılaştıurılacak
                             # canlı girdiği afetten sonra 3 şey olabilir:
-                            
                             # eğer bağışıklığı varsa ve durability yüksekse, hastalığı çok az etkiyle tur sonuna kadar sahip olur ve sonraki güne düzelir.
                             # eğer bağışıklığı yoksa ve durabilty yüksekse, o tur dezavantajlı kalıp sonraki tura düzelir ve bağışıklık kazanabilir.
                             # eğer bağışıklığı yoksa ve durability düşükse, şansa bağlı 2 seçenek var:
-                            # ya ölür, 
-                            # ya da yaşar ama özür kalıcı hale geçer ve yeni bir özürlü sülale oluşur."""
+                            #   ya ölür, 
+                            #   ya da yaşar ama özür kalıcı hale geçer ve yeni bir özürlü sülale oluşur."""
 
             return chars,True
         else:
             self.disasterTime = 0
             self.body.visible = False
+            self.Text.visible = False
             del self.body
+            del self.Text
             return chars,False
         
-            
+    def lethalDisaster(self):
+        self.state = 0
+        self.body = vp.cylinder(pos=vp.vector(self.posX,1,self.posY),
+                                size=vp.vector(2,self.radius,self.radius), 
+                                axis=vp.vector(0,-1,0),
+                                color= vp.color.red,
+                                opacity = 0.5)
+        self.Text = vp.label(text=f"Lethal ",color=vp.color.red,pos=self.body.pos,line=True)
+
     def harmfulDisaster(self):
         self.state = 1
         self.immunity = random.randint(specs["immunity"][0],specs["immunity"][1])
-        self.category = random.choice(list(specs.keys()))
+        keys = list(specs.keys())
+        keys.remove("durability")
+        self.category = random.choice(keys)
         self.body = vp.cylinder(pos=vp.vector(self.posX,1,self.posY),
                                 size=vp.vector(2,self.radius,self.radius), 
                                 axis=vp.vector(0,-1,0),
                                 color= vp.color.orange,
-                                opacity= 0.5) # topla burayı yükseklikler dengesiz
+                                opacity= 0.5)
+        self.Text = vp.label(text=f"{self.category} - {self.harsnessLevel:.2f}",color=vp.color.orange,pos=self.body.pos,line=True)
 
     def instantDisasters(self):
         self.state = 2
@@ -139,5 +136,7 @@ class Disasters:
         self.body = vp.cylinder(pos=vp.vector(self.posX,1,self.posY),
                                 size=vp.vector(2,self.radius,self.radius), 
                                 axis=vp.vector(0,-1,0),
-                                color= vp.color.green,
-                                opacity= 0.5) # topla burayı yükseklikler dengesiz
+                                color= vp.color.yellow,
+                                opacity= 0.5)
+        self.Text = vp.label(text=f"{self.category} - {self.harsnessLevel:.2f}",color=vp.color.yellow,pos=self.body.pos,line=True)
+

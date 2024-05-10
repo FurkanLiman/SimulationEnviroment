@@ -20,6 +20,7 @@ genePool = {}
 class Chars:
     chars = {}
     EoDStats = {}
+    population = {}
     def __init__(self, number=10):
         for i in range(number):
             pos = round(environment.envSizes[0]*0.85/number,2)*i-round(environment.envSizes[0]*0.85/2,2)
@@ -45,7 +46,7 @@ class Chars:
                 winners.append(char.id)
                 oldGene= char.gene
                 mutationState = char.mutation()
-                if mutationState:
+                if mutationState and (char.gene not in genePool):
                     nstyle = NodeStyle()
                     nstyle["size"] = 10
                     nstyle["fgcolor"] = ("#{:02x}{:02x}{:02x}".format(int(char.body.color.x*255), int(char.body.color.y*255), int(char.body.color.z*255)))
@@ -55,7 +56,7 @@ class Chars:
                 char.unVisible()
                 losers.append(char.id)
         
-        self.dailyStats(winners)
+        self.dailyStats(winners,len(losers))
         
         for charId in winners:
             while True:#burayı değiştir bence belki buga girmesini burası sağlıyordur
@@ -84,7 +85,7 @@ class Chars:
             
         return winners, losers
         
-    def dailyStats(self, winners):
+    def dailyStats(self, winners,lenLosers):
         
         if len(winners):
             sumS = {name: 0 for name in list(self.chars[winners[0]].genomes.keys())}
@@ -97,9 +98,8 @@ class Chars:
                     
             
             self.EoDStats[day] = [values/len(winners) for values in list(sumS.values())]
-
-            
-        
+            self.population[day] = [(len(winners)+lenLosers),len(winners),lenLosers,isDisasterInDay]
+ 
     def resetPos(self):
         i = 0
         for char in self.chars.values():
@@ -143,10 +143,21 @@ class Chars:
     def lookSickness(self):
         for id in self.chars.keys():
             self.chars[id].sickness()
+            
     def lookHeal(self):
         for id in self.chars.keys():
-            self.chars[id].heal()
-            
+            if self.chars[id].diseased != {}:
+                oldGene= self.chars[id].gene
+                changeState = self.chars[id].heal()
+
+                if changeState and (self.chars[id].gene not in genePool):
+                    nstyle = NodeStyle()
+                    nstyle["size"] = 10
+                    nstyle["fgcolor"] = ("#{:02x}{:02x}{:02x}".format(int(self.chars[id].body.color.x*255), int(self.chars[id].body.color.y*255), int(self.chars[id].body.color.z*255)))
+                    genePool.update({self.chars[id].gene: genePool[oldGene].add_child(name=self.chars[id].gene)})
+                    genePool[self.chars[id].gene].set_style(nstyle)
+                    
+                
 class Foods:
     foods = {}
     def __init__(self,number):
@@ -172,7 +183,7 @@ class Foods:
             self.foods[i] = food
         
 dozenChar = Chars(10)
-dozenFood = Foods(70)
+dozenFood = Foods(80)
 
 env.dozenChar = dozenChar
 env.menu.choices= env.updateMenu(dozenChar)
@@ -198,6 +209,7 @@ for file_name in fileList:
 #disasters = naturalDisasters.Disasters()
 dayLength = 24*60
 isDisaster = False
+isDisasterInDay = 0
 #Daily loop
 while True:
     if env.running:
@@ -207,30 +219,29 @@ while True:
             dozenChar.lookSickness()
         
         if times >= dayLength:
-            dozenChar.lookHeal()
             
+            dozenChar.lookHeal()
             dozenChar.endofDay(dozenFood)
             env.dozenChar = dozenChar
             env.menu.choices= env.updateMenu(dozenChar)
             
-            # afet oranını al ve burada hesapla laızm olunca burada afet olustur.afet süresi de olsun
-            disasterHarsness = env.disasterHarsness # (1-3)bu değeri arayüzden al (skala ile çevrenin zorluğu ayarla örn : 3 lethal, 2-3 harmfull(2 3 arası değerin boyutuna göre etki de artıp azalsın))
+            disasterHarsness = env.disasterHarsness
             disasterRandom = random.random()
             isDisaster = False
+            isDisasterInDay = 0
             if disasterRandom<env.disasterPossibility:
                 isDisaster = True
-                disasterTime = random.randint(0,int(dayLength*0.7))
+                disasterTime = random.randint(int(dayLength*0.45),int(dayLength*0.90))
                 disasters = naturalDisasters.Disasters(disasterHarsness,disasterTime)
-            
-
+                isDisasterInDay = disasters.state +1
             
             PhyloTree.render(f"results/dailyPhyloTree/Tree_day{day}.png", tree_style=ts)
             filenames.append(f"results/dailyPhyloTree/Tree_day{day}.png")
             
             times = 0
             day +=1
-        if day >= 15 or len(dozenChar.chars.keys()) == 0:
-            break
+            if day >= 11 or len(dozenChar.chars.keys()) == 0:
+                break
         times += 1
         env.dayInfo.text = f"    |     Time= {(times//60):02d}:{(times%60):02d}    Day= {day}"
         vp.rate(env.speed.value)
@@ -249,7 +260,7 @@ if len(filenames)!=0:
 dozenChar.countGene()
 #Graphs
 radarChart.resultChart(dozenChar.EoDStats)
-lineChart.lineResult(dozenChar.EoDStats)
+lineChart.lineResult(dozenChar.EoDStats,dozenChar.population)
 lineChart.populationDistribution(dozenChar.chars)
 PhyloTree.show(tree_style=ts)
 
