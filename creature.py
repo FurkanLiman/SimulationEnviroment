@@ -1,7 +1,7 @@
 import vpython as vp
 from time import *
 import random
-from environment import envSizes
+from startUpWindow import startUpConfigurations
 import mutationFactors
 import math
 import fovCalculation
@@ -50,7 +50,7 @@ class Creature:
         self.angle.visible = False 
     
     def pos(self):
-        if abs(self.body.pos.x) >= envSizes[0]/2 or abs(self.body.pos.z) >= envSizes[2]/2:
+        if abs(self.body.pos.x) >= startUpConfigurations["envSizes"][0]/2 or abs(self.body.pos.z) >= startUpConfigurations["envSizes"][2]/2:
             self.body.axis *= -1 
         
         displacement = self.body.axis * self.genomes["speed"]

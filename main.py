@@ -1,3 +1,4 @@
+import startUpWindow
 import vpython as vp
 import time
 import environment
@@ -10,8 +11,12 @@ import radarChart
 import lineChart
 import os
 import naturalDisasters
+import math
 
-env = environment.Enviroment(environment.envSizes)
+startUpWindow.StartUp()
+startUpConfigurations= startUpWindow.startUpConfigurations
+envSizes = startUpConfigurations["envSizes"]
+env = environment.Enviroment(envSizes)
 
 PhyloTree = Tree()
 root = PhyloTree.get_tree_root()
@@ -22,17 +27,34 @@ class Chars:
     EoDStats = {}
     population = {}
     def __init__(self, number=10):
-        for i in range(number):
-            pos = round(environment.envSizes[0]*0.85/number,2)*i-round(environment.envSizes[0]*0.85/2,2)
-            char = creature.Creature(idnumber=i,pos=(pos,0,(environment.envSizes[2]*0.9)//2))
-
-            self.chars[i]= char
-            if self.chars[i].gene not in genePool:
-                nstyle = NodeStyle()
-                nstyle["fgcolor"] = ("#{:02x}{:02x}{:02x}".format(int(char.body.color.x*255), int(char.body.color.y*255), int(char.body.color.z*255)))
-                nstyle["size"] = 10
-                genePool[self.chars[i].gene] = root.add_child(name= self.chars[i].gene)
-                genePool[self.chars[i].gene].set_style(nstyle)
+        positions = [
+            (envSizes[0], 0, (envSizes[2] * 0.9) // 2),
+            (envSizes[2], 0, (envSizes[0] * 0.9) // 2),
+            (envSizes[0], 0, (-envSizes[2] * 0.9) // 2),
+            (envSizes[2], 0, (-envSizes[0] * 0.9) // 2),
+        ]
+        say = number
+        idm = 0
+        for j in range(4):
+            if say%4 != 0:
+                don = say//4 + 1
+                say -=1
+            else:
+                don = number//4
+            for i in range(don):
+                pos = round(positions[j][0] * 0.85 / (number / 4), 2) * i - round(positions[j][0] * 0.85 / 2, 2)
+                actual_pos = (pos, 0, positions[j][2]) if j % 2 == 0 else (positions[j][2], 0, pos)
+                char = creature.Creature(idnumber=idm, pos=actual_pos)
+                self.chars[idm] = char
+                if self.chars[idm].gene not in genePool:
+                    nstyle = NodeStyle()
+                    nstyle["fgcolor"] = ("#{:02x}{:02x}{:02x}".format(int(char.body.color.x*255), int(char.body.color.y*255), int(char.body.color.z*255)))
+                    nstyle["size"] = 10
+                    genePool[self.chars[idm].gene] = root.add_child(name= self.chars[idm].gene)
+                    genePool[self.chars[idm].gene].set_style(nstyle)
+                idm +=1
+                
+       
 
     def setPos(self,foodlist):
         for char in self.chars.values():
@@ -103,10 +125,10 @@ class Chars:
     def resetPos(self):
         i = 0
         for char in self.chars.values():
-            pos = round(environment.envSizes[0]*0.85/len(self.chars)*i,2)-round(environment.envSizes[0]*0.85/2,2)
+            pos = round(envSizes[0]*0.85/len(self.chars)*i,2)-round(envSizes[0]*0.85/2,2)
             axis = vp.vector(1,0,0)
             char.body.axis = axis
-            char.body.pos=vp.vector(pos,0,(environment.envSizes[2]*0.9)//2)            
+            char.body.pos=vp.vector(pos,0,(envSizes[2]*0.9)//2)            
             char.idText.pos = char.body.pos
             char.angle.pos.x = (char.genomes["visionRadius"]/2)*axis.x + char.body.pos.x
             char.angle.pos.z = (char.genomes["visionRadius"]/2)*axis.z + char.body.pos.z
@@ -163,8 +185,8 @@ class Foods:
     def __init__(self,number):
         self.number = number
         for i in range(number):
-            x = int(environment.envSizes[0]*0.75)
-            z = int(environment.envSizes[2]*0.75)
+            x = int(envSizes[0]*0.75)
+            z = int(envSizes[2]*0.75)
             pos = (random.randint(0,x)-x//2,0,random.randint(0,z)-z//2)
             food = creature.Food(pos=pos, id=i)
             self.foods[i] = food
@@ -176,14 +198,14 @@ class Foods:
         self.foods.clear()
         
         for i in range(self.number):
-            x = int(environment.envSizes[0]*0.75)
-            z = int(environment.envSizes[2]*0.75)
+            x = int(envSizes[0]*0.75)
+            z = int(envSizes[2]*0.75)
             pos = (random.randint(0,x)-x//2,0,random.randint(0,z)-z//2)
             food = creature.Food(pos=pos, id=i)
             self.foods[i] = food
         
-dozenChar = Chars(10)
-dozenFood = Foods(80)
+dozenChar = Chars(startUpConfigurations["startPopulation"])
+dozenFood = Foods(startUpConfigurations["startFood"])
 
 env.dozenChar = dozenChar
 env.menu.choices= env.updateMenu(dozenChar)
@@ -204,6 +226,10 @@ for file_name in fileList:
     if file_name.endswith(".png"):
         file_path = os.path.join(folderPath, file_name)
         os.remove(file_path)
+
+# Giriş sayfası ayarları
+
+
 
 
 #disasters = naturalDisasters.Disasters()
