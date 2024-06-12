@@ -1,0 +1,35 @@
+{
+    "Day": [
+        1
+    ],
+    "Population": [
+        25
+    ],
+    "Winners": [
+        24
+    ],
+    "Losers": [
+        1
+    ],
+    "DisasterType": [
+        0
+    ],
+    "speed": [
+        0.2999999999999999
+    ],
+    "vision": [
+        30.0
+    ],
+    "visionRadius": [
+        10.0
+    ],
+    "immunity": [
+        1.0
+    ],
+    "durability": [
+        1.141666666666666
+    ],
+    "mutationRate": [
+        0.005
+    ]
+}

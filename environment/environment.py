@@ -1,6 +1,6 @@
 import vpython as vp
 from time import *
-import mutationFactors
+import creature.mutationFactors as mutationFactors
 
 #1800*900
 envSizes = 150,1,150

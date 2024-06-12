@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from mutationFactors import specs
+from creature.mutationFactors import specs
 
 def lineResult(EoDStats, population):
     

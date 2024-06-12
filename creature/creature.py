@@ -1,10 +1,10 @@
 import vpython as vp
 from time import *
 import random
-from startUpWindow import startUpConfigurations
-import mutationFactors
+from environment.startUpWindow import startUpConfigurations
+import creature.mutationFactors as mutationFactors
 import math
-import fovCalculation
+import creature.fovCalculation as fovCalculation
 
 class Creature:
     time = 0

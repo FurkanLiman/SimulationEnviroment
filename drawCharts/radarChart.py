@@ -1,6 +1,6 @@
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from mutationFactors import specs
+from creature.mutationFactors import specs
 import plotly.offline as pyo
 
 def resultChart(EoDStats):

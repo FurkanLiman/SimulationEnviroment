@@ -4,25 +4,28 @@ from tkinter import ttk
 startUpConfigurations = {
 "startPopulation" : 10,
 "startFood" : 10,
-"envSizes" : [100,1,100]
+"envSizes" : [100,1,100],
+"dayLimit":5
 }
+
 def StartUp():
     
     root = tk.Tk()
     root.title("Slider ve Text Box Örneği")
-    root.geometry("600x350")
-
+    root.geometry("600x400")
 
     sliderPop_value = tk.StringVar(value="60")
     sliderFood_value = tk.StringVar(value="10")
     sliderX_value = tk.StringVar(value="60")
     sliderY_value = tk.StringVar(value="60")
+    sliderDay_value = tk.StringVar(value="5")
 
     def update_sliders_value(event):
         sliderPop_value.set(int(sliderPop.get()))
         sliderFood_value.set(int(sliderFood.get()))
         sliderX_value.set(int(sliderX.get()))
         sliderY_value.set(int(sliderY.get()))
+        sliderDay_value.set(int(sliderDay.get()))
     
     
     frame = tk.Frame(root)
@@ -61,12 +64,22 @@ def StartUp():
     value_label4 = ttk.Label(frame4, textvariable=sliderY_value)
     value_label4.pack(side=tk.LEFT, padx=10)
     
+    frame5 = tk.Frame(root)
+    frame5.pack(pady=20)
+    label5 = ttk.Label(frame5, text="Day Limit:")
+    label5.pack(side=tk.LEFT, padx=10)
+    sliderDay = ttk.Scale(frame5, from_=2, to=50, orient='horizontal', length=250,variable=sliderDay_value, command=update_sliders_value)
+    sliderDay.pack(side=tk.LEFT, padx=10)
+    value_label5 = ttk.Label(frame5, textvariable=sliderDay_value)
+    value_label5.pack(side=tk.LEFT, padx=10)
+    
     def Start():
         global startUpConfigurations
         startUpConfigurations["startPopulation"] = int(sliderPop.get())
         startUpConfigurations["startFood"] = int(sliderFood.get())
         startUpConfigurations["envSizes"][0] = int(sliderX.get())
         startUpConfigurations["envSizes"][2] = int(sliderY.get())        
+        startUpConfigurations["dayLimit"] = int(sliderDay.get())   
         root.destroy()
 
     buton = ttk.Button(root, text="Start", command=Start)
@@ -74,3 +87,9 @@ def StartUp():
 
     root.mainloop()
 
+def updateConfig(pop,food,sizeX,sizeY,day):
+    global startUpConfigurations 
+    startUpConfigurations["startPopulation"] = pop
+    startUpConfigurations["startFood"] = food
+    startUpConfigurations["envSizes"] =  [sizeX,1,sizeY]
+    startUpConfigurations["dayLimit"] = day

@@ -1,7 +1,7 @@
 import vpython as vp
 import random
-from environment import envSizes
-from mutationFactors import specs
+from environment.environment import envSizes
+from creature.mutationFactors import specs
 
 # lethal disasters - permanent effect - red
 # harmful disasters - permanent effect - yellow-orange
@@ -9,7 +9,7 @@ from mutationFactors import specs
 # all disasters must have posibilities with selection (user can select danger and frequency)
 # chars in disaster will be marked
 class Disasters:
-    sizeRatio = [0.15,0.30]    # Minimum and maximum size range, relative to the entire area. 
+    sizeRatio = [0.05,0.15]    # Minimum and maximum size range, relative to the entire area. 
     def __init__(self, disasterHarsness=0,disasterTime=720):
         
         areaRatio =  random.randint(int(self.sizeRatio[0]*100),int(self.sizeRatio[1]*100))/100
